@@ -1,5 +1,6 @@
 package com.ergasia.minty;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,53 +14,36 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.room.Room;
 
 import com.ergasia.minty.entities.User;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    private EditText usernameInput, passwordInput, firstNameInput, lastNameInput, emailInput;
-
+    private EditText emailInput, passwordInput;
     private Button registerButton;
-
-    private AppDatabase db;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "minty-db").allowMainThreadQueries().build();
-
-        usernameInput = findViewById(R.id.editUsername);
-        emailInput = findViewById(R.id.editEmailAddress);
-        passwordInput = findViewById(R.id.editPassword);
-        firstNameInput = findViewById(R.id.editFirstName);
-        lastNameInput = findViewById(R.id.editLastName);
-
+        mAuth = FirebaseAuth.getInstance();
+        emailInput = findViewById(R.id.editEmailProfile);
         registerButton = findViewById(R.id.registerBtn);
-
+        passwordInput = findViewById(R.id.editPassword);
 
         registerButton.setOnClickListener(v -> {
-            String username = usernameInput.getText().toString();
-            String password = passwordInput.getText().toString();
-            String firstName = firstNameInput.getText().toString();
-            String lastName = lastNameInput.getText().toString();
-            String email = emailInput.getText().toString();
+            String password = passwordInput.getText().toString().trim();
+            String email = emailInput.getText().toString().trim();
 
-
-            if (!username.isEmpty() && !password.isEmpty()) {
-                User existingUser = db.userDao().findByUsername(username);
-                if (existingUser == null) {
-                    db.userDao().registerUser(new User(firstName, lastName, username, email, password));
-                    Toast.makeText(this, "Registration successful", Toast.LENGTH_SHORT).show();
-                    finish(); // go back to login
+            mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    startActivity(new Intent(RegisterActivity.this, DashboardActivity.class));
+                    finish();
                 } else {
-                    Toast.makeText(this, "User already exists", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Registration failed", Toast.LENGTH_SHORT).show();
                 }
-                Toast.makeText(this, "All fields are required", Toast.LENGTH_SHORT).show();
-            }
-
+            });
         });
-
-
     }
 }

@@ -1,5 +1,6 @@
 package com.ergasia.minty.entities.dao;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -24,8 +25,8 @@ public interface UserDao {
     @Query("SELECT * FROM users")
     public List<User> getAll();
 
-    @Query("SELECT * FROM users WHERE id IN (:userIds)")
-    public List<User> loadAllByIds(int[] userIds);
+    @Query("SELECT * FROM users WHERE id = :userId")
+    public User findUserById(int userId);
 
     @Query("SELECT * FROM users WHERE username LIKE :username")
     public User findByUsername(String username);
