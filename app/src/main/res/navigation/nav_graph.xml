@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment"
+    >
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.ergasia.minty.fragments.HomeFragment"
+        android:label="Home"
+        />
+    <fragment
+       android:label="Transactions"
+        android:name="com.ergasia.minty.fragments.TransactionsFragment"
+        android:id="@+id/transactionsFragment"
+        />
+    <fragment android:id="@+id/addFragment" android:name="com.ergasia.minty.fragments.AddFragment" android:label="Add" />
+    <fragment android:label="Profile" android:name="com.ergasia.minty.fragments.ProfileFragment" android:id="@+id/profileFragment" />
+</navigation>
