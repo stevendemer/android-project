@@ -15,12 +15,8 @@ import com.google.firebase.auth.FirebaseAuth;
 public class LoginActivity extends AppCompatActivity {
     private EditText emailInput, passwordInput;
     private FirebaseAuth mAuth;
-
-    private Button loginButton, registerButton;
-
-    private AppDatabase db;
-
-
+    private Button loginButton;
+    private Button registerButton;
     private static final String TAG = "LoginActivity"; // Tag for logs
 
     @Override
@@ -31,7 +27,7 @@ public class LoginActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         emailInput = findViewById(R.id.editEmailProfile);
-        passwordInput = findViewById(R.id.editPasswordLogin);
+        passwordInput = findViewById(R.id.editPassword);
 
         loginButton = findViewById(R.id.loginButton);
 
@@ -51,6 +47,7 @@ public class LoginActivity extends AppCompatActivity {
                     });
                 });
 
+        // redirect to the register page
         registerButton.setOnClickListener(v -> {
             startActivity(new Intent(this,RegisterActivity.class));
         });

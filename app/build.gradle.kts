@@ -40,9 +40,12 @@ dependencies {
     implementation(libs.googleid)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage)
 
     val room_version = "2.7.1"
     val fragment_version = "1.8.6"
+    val lottie_version = "6.3.0"
 
     annotationProcessor("androidx.room:room-compiler:$room_version")
     // optional - RxJava2 support for Room
@@ -56,6 +59,9 @@ dependencies {
 
     implementation("androidx.fragment:fragment:$fragment_version")
 
+    implementation("com.airbnb.android:lottie:$lottie_version")
+
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 
     implementation(libs.appcompat)
     implementation(libs.material)

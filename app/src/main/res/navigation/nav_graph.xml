@@ -2,18 +2,33 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/homeFragment"
-    >
+    app:startDestination="@id/nav_home">
+
+    <!-- Home Fragment -->
     <fragment
-        android:id="@+id/homeFragment"
-        android:name="com.ergasia.minty.fragments.HomeFragment"
+        android:id="@+id/nav_home"
         android:label="Home"
-        />
+        android:name="com.ergasia.minty.fragments.HomeFragment"
+        android:layout="@layout/fragment_home" />
+
+    <!-- Transactions Fragment -->
     <fragment
-       android:label="Transactions"
+        android:id="@+id/nav_transactions"
         android:name="com.ergasia.minty.fragments.TransactionsFragment"
-        android:id="@+id/transactionsFragment"
-        />
-    <fragment android:id="@+id/addFragment" android:name="com.ergasia.minty.fragments.AddFragment" android:label="Add" />
-    <fragment android:label="Profile" android:name="com.ergasia.minty.fragments.ProfileFragment" android:id="@+id/profileFragment" />
+        android:label="Transactions"
+        android:layout="@layout/fragment_transactions" />
+
+    <!-- Add Fragment -->
+    <fragment
+        android:id="@+id/nav_add"
+        android:name="com.ergasia.minty.fragments.AddFragment"
+        android:label="Add"
+        android:layout="@layout/fragment_add" />
+
+    <!-- Profile Fragment -->
+    <fragment
+        android:id="@+id/nav_profile"
+        android:name="com.ergasia.minty.fragments.ProfileFragment"
+        android:label="Profile"
+        android:layout="@layout/fragment_profile" />
 </navigation>
