@@ -124,8 +124,8 @@ public class ProfileFragment  extends Fragment {
         updateProfileButton.setOnClickListener(v -> {
             String newUsername = usernameEdit.getText().toString().trim();
             updateProfile(user, newUsername);
+            Toast.makeText(getContext(), "Profile updated", Toast.LENGTH_SHORT).show();
         });
-        Toast.makeText(getContext(), "Profile updated", Toast.LENGTH_SHORT).show();
         }
         return view;
     }
