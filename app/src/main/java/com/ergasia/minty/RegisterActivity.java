@@ -60,19 +60,21 @@ public class RegisterActivity extends AppCompatActivity {
 //    private void createUserDocument(FirebaseUser user, String username) {
 //        Map<String, Object> userDoc = new HashMap<>();
 //
-//        userDoc.put("email", user.getEmail());
+//         userDoc.put("email", user.getEmail());
 //        userDoc.put("username", username);
+//        userDoc.put("profileImageUrl", "");
 //        userDoc.put("createdAt", FieldValue.serverTimestamp());
 //
 //        db.collection("users").document(user.getUid()).set(userDoc).addOnSuccessListener(v -> Log.d(TAG, "User profile created")).addOnFailureListener(e -> Log.w(TAG, "Error creating user profile" + e.toString()));
 //    }
-//
-    private void handleRegister() {
-         String username = Objects.requireNonNull(usernameInput.getText()).toString().trim();
-         String email = Objects.requireNonNull(emailInput.getText()).toString().trim();
-         String password = Objects.requireNonNull(passwordInput.getText()).toString().trim();
 
-         if (username.isEmpty()) {
+    private void handleRegister() {
+        String username = Objects.requireNonNull(usernameInput.getText()).toString().trim();
+        String email = Objects.requireNonNull(emailInput.getText()).toString().trim();
+        String password = Objects.requireNonNull(passwordInput.getText()).toString().trim();
+        String profileImageUrl = "";
+
+        if (username.isEmpty()) {
              usernameInput.setError("Username is required");
              return;
          }
@@ -94,7 +96,6 @@ public class RegisterActivity extends AppCompatActivity {
                 FirebaseUser firebaseUser = mAuth.getCurrentUser();
 
                 if (firebaseUser != null) {
-
                     // create instance of user class
                     User user = new User(firebaseUser.getUid(), username, firebaseUser.getEmail());
 

@@ -44,8 +44,14 @@ public class HomeFragment  extends Fragment {
         if (user != null) {
             db.collection("users").document(user.getUid()).get().addOnSuccessListener(documentSnapshot -> {
                 if (documentSnapshot.exists()) {
+                    Double incomeValue = documentSnapshot.getDouble("income");
+                    if (incomeValue != null) {
+                        incomeTextView.setText(String.valueOf(incomeValue));
+                    } else {
+                        incomeTextView.setText("N/A"); // or any default fallback
+                    }
                     usernameTextView.setText(documentSnapshot.getString("username"));
-                    incomeTextView.setText(documentSnapshot.getString("income"));
+                    //incomeTextView.setText(documentSnapshot.getString("income"));
                     Log.d(TAG, "User found");
                 } else {
                     Log.d(TAG, "User not found");

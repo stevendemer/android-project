@@ -14,6 +14,7 @@ public class User {
     private String uid;
     private String username;
     private String email;
+    private String profileImageUrl;
     private Map<String, Expense> expenses;
     private double income;
 
@@ -26,6 +27,7 @@ public class User {
         this.uid = uid;
         this.username = username;
         this.email = email;
+        this.profileImageUrl = "";
     }
 
     public User(String uid, String username, String email, double income) {
@@ -33,6 +35,7 @@ public class User {
         this.username = username;
         this.email = email;
         this.income = income;
+        this.profileImageUrl = "";
     }
 
     public User(String uid, String username, String email, double income, Map<String, Expense> expenses) {
@@ -41,6 +44,7 @@ public class User {
         this.email = email;
         this.expenses = expenses;
         this.income = income;
+        this.profileImageUrl = "";
     }
 
     public String getUid() {
@@ -102,6 +106,7 @@ public class User {
                 "uid='" + uid + '\'' +
                 ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
+                ", profileImageUrl=" + profileImageUrl + '\'' +
                 ", expenses=" + expenses +
                 ", income=" + income +
                 '}';
