@@ -17,39 +17,85 @@
         android:layout_height="wrap_content"
         android:textSize="28sp"
         android:textColor="@color/md_theme_onPrimary"
+        android:drawableTint="@color/md_theme_onPrimary"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        />
+        android:drawableStart="@drawable/account_circle_24px"
+        android:drawablePadding="9dp"
+    />
 
     <!-- Income with plus icon -->
     <LinearLayout
-        android:id="@+id/incomeLayout"
-        android:layout_width="wrap_content"
+        android:id="@+id/incomeInputLayout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:gravity="center_vertical"
+        android:layout_marginTop="16dp"
         app:layout_constraintTop_toBottomOf="@id/usernameTextView"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="16dp">
+        app:layout_constraintEnd_toEndOf="parent"
+        android:orientation="vertical"
+    >
 
         <TextView
-            android:id="@+id/incomeTextView"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Total income: $0"
-            android:textSize="18sp"
+            android:text="@string/your_balance"
+            android:layout_marginBottom="20dp"
+            android:textSize="22sp"
             android:textColor="@color/md_theme_onPrimary"
-        />
+            android:id="@+id/balanceTextView"
+        >
+        </TextView>
 
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/incomeTextInputLayout"
+            app:endIconMode="clear_text"
+            style="?attr/textInputFilledStyle"
+            android:hint="@string/amount"
+            android:layout_marginTop="6dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium"
+            app:startIconDrawable="@drawable/attach_money_24px"
+        >
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="numberDecimal"
+            android:backgroundTint="@color/md_theme_background_highContrast"
+            android:id="@+id/editTransactionText"
+        />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:checked="true"
+            android:textOn="@string/income"
+            android:textOff="@string/expense"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/md_theme_onPrimary"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/incomeTextInputLayout"
+            android:text="@string/income_flag"
+            android:textSize="18sp"
+            android:id="@+id/incomeSwitch"
+        />
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/addIncomeIcon"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_marginStart="8dp"
-            android:src="@drawable/add_24px"
-            android:theme="@style/Widget.Material3.Button.TonalButton"
+            android:id="@+id/makeTransactionButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:iconPadding="10dp"
+            android:text="@string/make_transaction"
+            style="?attr/materialIconButtonFilledStyle"
+            android:layout_marginTop="8dp"
             android:textColor="@color/md_theme_onPrimary"
         />
     </LinearLayout>
@@ -59,25 +105,28 @@
         android:id="@+id/expensesTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Expenses"
+        android:text="@string/expenses"
         android:textSize="18sp"
         android:textColor="@android:color/white"
         android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@id/incomeLayout"
+        app:layout_constraintTop_toBottomOf="@id/incomeInputLayout"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginTop="24dp" />
 
     <!-- Expenses List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/expensesRecyclerView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:clipToPadding="false"
+        android:fitsSystemWindows="true"
+        android:contentDescription="List of expenses"
         app:layout_constraintTop_toBottomOf="@id/expensesTitle"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:paddingTop="8dp"
-        android:paddingBottom="8dp" />
+        android:paddingBottom="8dp"
+    />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

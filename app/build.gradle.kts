@@ -36,12 +36,23 @@ dependencies {
 
     implementation(libs.firebase.auth)
     implementation(libs.credentials)
-    implementation(libs.credentials.play.services.auth)
     implementation(libs.googleid)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.storage)
+
+
+    // Import the BoM for the Firebase platform
+    implementation(platform("com.google.firebase:firebase-bom:33.13.0"))
+
+    // Add the dependency for the Firebase Authentication library
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    implementation("com.google.firebase:firebase-auth")
+
+    // Also add the dependencies for the Credential Manager libraries and specify their versions
+    implementation("androidx.credentials:credentials-play-services-auth:1.5.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 
     val room_version = "2.7.1"
     val fragment_version = "1.8.6"
@@ -54,8 +65,6 @@ dependencies {
     implementation("androidx.room:room-rxjava3:$room_version")
     // optional - Guava support for Room, including Optional and ListenableFuture
     implementation("androidx.room:room-guava:$room_version")
-
-    implementation ("com.google.android.material:material:1.9.0")
 
     implementation("androidx.fragment:fragment:$fragment_version")
 

@@ -12,4 +12,14 @@
     <string name="login">Already have an account? Login</string>
     <string name="background">Background image</string>
     <string name="logout">Logout</string>
+    <string name="default_web_client_id">952737007529-j3nncm97589v3kig3nu4mtt9dh41n1dn.apps.googleusercontent.com</string>
+    <string name="amount">Amount</string>
+    <string name="expenses">Expenses</string>
+    <string name="your_balance">Your balance: %1$.2f</string>
+    <string name="make_transaction">Make transaction</string>
+    <string name="income_flag">Is income</string>
+    <string name="income">Income</string>
+    <string name="expense">Expense</string>
+    <string name="add_expense">Add expense</string>
+    <string name="add_income">Add income</string>
 </resources>
