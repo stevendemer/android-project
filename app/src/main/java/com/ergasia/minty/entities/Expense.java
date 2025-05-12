@@ -8,72 +8,38 @@ import androidx.room.PrimaryKey;
 
 import java.util.Date;
 
-@Entity(tableName = "expenses", foreignKeys = @ForeignKey(
-        entity = User.class,
-        parentColumns = "id",
-        childColumns = "user_id",
-        onDelete = ForeignKey.CASCADE
-))
 public class Expense {
+    private String uid;
+    private String title;
+    private double amount;
+    private String category;
+    private long timestamp;
 
-    @PrimaryKey(autoGenerate = true)
-    public int id;
+    public Expense() {
+    }
 
-    @ColumnInfo(name = "user_id", index = true)
-    public int userId;
-
-    @ColumnInfo(name = "category")
-    public String category;
-
-    @ColumnInfo(name = "note")
-    public String note;
-
-    public double amount;
-
-    @ColumnInfo(name = "date")
-    public Date date;
-
-
-    public Expense(int id, int userId, String category, String note, double amount, Date date) {
-        this.id = id;
-        this.userId = userId;
-        this.category = category;
-        this.note = note;
+    public Expense(String uid, String title, double amount, long timestamp, ExpenseCategory category) {
+        this.uid = uid;
+        this.title = title;
         this.amount = amount;
-        this.date = date;
+        this.timestamp = timestamp;
+        this.category = category.name();
     }
 
-
-    public int getId() {
-        return id;
+    public String getUid() {
+        return uid;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 
-    public int getUserId() {
-        return userId;
+    public String getTitle() {
+        return title;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public double getAmount() {
@@ -84,25 +50,31 @@ public class Expense {
         this.amount = amount;
     }
 
-    public Date getDate() {
-        return date;
+    public String getCategory() {
+        return category;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    public void setCategory(String category) {
+        this.category = category;
     }
 
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
 
     @NonNull
     @Override
     public String toString() {
         return "Expense{" +
-                "id=" + id +
-                ", userId=" + userId +
-                ", category='" + category + '\'' +
-                ", note='" + note + '\'' +
+                "uid='" + uid + '\'' +
+                ", title='" + title + '\'' +
                 ", amount=" + amount +
-                ", date=" + date +
+                ", category='" + category + '\'' +
+                ", timestamp=" + timestamp +
                 '}';
     }
 }

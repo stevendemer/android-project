@@ -129,11 +129,6 @@ public class ProfileFragment  extends Fragment {
         }
         return view;
     }
-    private void openFileChooser() {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-    }
 
     /**
      * Update the profile's username

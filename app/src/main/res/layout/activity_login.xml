@@ -45,7 +45,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Login Button -->
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/loginButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -58,7 +58,7 @@
         />
 
     <!-- Register Button -->
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/registerBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

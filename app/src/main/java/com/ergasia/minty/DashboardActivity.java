@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -46,47 +48,53 @@ import java.util.Map;
 
 public class DashboardActivity extends AppCompatActivity {
 
-    private Button logoutButton;
-    private TextView welcomeText;
     private  FirebaseAuth mAuth;
-
     private MaterialToolbar topbar;
     private static final String TAG = "DashboardActivity"; // Tag for logs
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_dashboard);
 
+        MaterialToolbar toolbar = findViewById(R.id.top_bar);
+        setSupportActionBar(toolbar);
+
+
         // get the navigation controller
-//        NavController navController = Navigation.findNavController(this, R.id.nav_host);
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host);
         NavController navController = navHostFragment.getNavController();
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         NavigationUI.setupWithNavController(bottomNavigationView, navController);
 
-
-//       logoutButton = findViewById(R.id.logoutButton);
-//
-//        logoutButton.setOnClickListener(v -> {
-//            mAuth.signOut();
-//            startActivity(new Intent(DashboardActivity.this, LoginActivity.class));
-//            finish();
-//        });
     }
 
-    private void showPopupMenu(View anchor) {
-        PopupMenu popupMenu = new PopupMenu(this, anchor);
-        popupMenu.getMenu().add("Confirm Logout");
-
-        popupMenu.setOnMenuItemClickListener(item -> {
-            if ("Confirm Logout".equals(item.getTitle())) {
-                Toast.makeText(this, "Logging out...", Toast.LENGTH_SHORT).show();
-                return true;
-            }
-            return false;
-        });
-        popupMenu.show();
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.popup_menu, menu);
+        return true;
     }
+
+    private void logoutUser() {
+
+        mAuth = FirebaseAuth.getInstance();
+
+        // log out from firebase and go to login page
+        mAuth.signOut();
+        startActivity(new Intent(DashboardActivity.this, LoginActivity.class));
+        Toast.makeText(this, "Logged out", Toast.LENGTH_SHORT).show();
+        finish();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_logout) {
+            logoutUser();
+            return true;
+        }
+        return false;
+    }
+
 }

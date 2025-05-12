@@ -6,57 +6,49 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "users")
+import java.util.Map;
+
 public class User {
 
-    @PrimaryKey(autoGenerate = true)
-    public int id;
 
-    @ColumnInfo(name = "first_name")
-    public String firstName;
+    private String uid;
+    private String username;
+    private String email;
+    private Map<String, Expense> expenses;
+    private double income;
 
-    @ColumnInfo(name = "last_name")
-    public String lastName;
 
-    @ColumnInfo(name = "username")
-    public String username;
+    public User() {
+        // required for firebase
+    }
 
-    @ColumnInfo(name = "email")
-    public String email;
-
-    @ColumnInfo(name = "password")
-    public String password;
-
-    public User(String firstName, String lastName, String username, String email, String password) {
-        this.firstName = firstName;
-        this.lastName = lastName;
+    public User(String uid, String username, String email) {
+        this.uid = uid;
         this.username = username;
         this.email = email;
-        this.password = password;
     }
 
-    public int getId() {
-        return id;
+    public User(String uid, String username, String email, double income) {
+        this.uid = uid;
+        this.username = username;
+        this.email = email;
+        this.income = income;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public User(String uid, String username, String email, double income, Map<String, Expense> expenses) {
+        this.uid = uid;
+        this.username = username;
+        this.email = email;
+        this.expenses = expenses;
+        this.income = income;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getUid() {
+        return uid;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 
     public String getUsername() {
@@ -75,23 +67,43 @@ public class User {
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
+    public Map<String, Expense> getExpenses() {
+        return expenses;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setExpenses(Map<String, Expense> expenses) {
+        this.expenses = expenses;
+    }
+
+    public double getIncome() {
+        return income;
+    }
+
+    public void setIncome(double income) {
+        this.income = income;
+    }
+
+    public void removeExpense(Expense expense) {
+        if (this.expenses != null) {
+            this.expenses.remove(expense.getUid());
+        }
+    }
+
+    public void addExpense(Expense expense, String category) {
+        if (this.expenses != null) {
+            this.expenses.put(category, expense);
+        }
     }
 
     @NonNull
     @Override
     public String toString() {
         return "User{" +
-                "id=" + id +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
+                "uid='" + uid + '\'' +
                 ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
+                ", expenses=" + expenses +
+                ", income=" + income +
                 '}';
     }
 }

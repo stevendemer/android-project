@@ -10,7 +10,10 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.ergasia.minty.entities.User;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LoginActivity extends AppCompatActivity {
     private EditText emailInput, passwordInput;
@@ -51,5 +54,41 @@ public class LoginActivity extends AppCompatActivity {
         registerButton.setOnClickListener(v -> {
             startActivity(new Intent(this,RegisterActivity.class));
         });
+    }
+
+    private void handleLogin() {
+        String email = emailInput.getText().toString().trim();
+        String password = passwordInput.getText().toString().trim();
+
+        if (email.isEmpty()) {
+            emailInput.setError("Email is required");
+            return;
+        }
+        if (password.isEmpty()) {
+            passwordInput.setError("Password is required");
+            return;
+        }
+
+        mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                FirebaseUser firebaseUser = mAuth.getCurrentUser();
+
+                // load user data from firestore
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+                db.collection("users").document(firebaseUser.getUid()).get().addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        User user = documentSnapshot.toObject(User.class);
+                    } else {
+                        // login failed
+                        Toast.makeText(this, "Invalid credentials", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
+
+
+
+
     }
 }

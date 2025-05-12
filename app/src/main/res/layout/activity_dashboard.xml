@@ -5,6 +5,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/dark_purple_background"
+        android:scaleType="centerCrop"
+        android:contentDescription="@string/background"
+        android:alpha="0.9"
+        />
+
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/topbar_layout"
         android:layout_width="match_parent"
@@ -21,9 +30,10 @@
             app:navigationIcon="@drawable/menu_24px"
             app:title="Minty"
             android:id="@+id/top_bar"
+            app:titleTextColor="@color/md_theme_primary_highContrast"
+            app:popupTheme="@style/MaterialAlertDialog.Material3"
         />
     </com.google.android.material.appbar.AppBarLayout>
-
 
 <!--    <Button-->
 <!--        android:id="@+id/logoutButton"-->
@@ -48,6 +58,7 @@
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
+        style="@style/Widget.Material3.BottomNavigationView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:labelVisibilityMode="labeled"

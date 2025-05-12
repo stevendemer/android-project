@@ -23,6 +23,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -32,7 +33,6 @@ public class RegisterActivity extends AppCompatActivity {
     private Button registerButton;
     private Button loginButton;
     private FirebaseAuth mAuth;
-    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final String TAG = "RegisterActivity";
 
     @Override
@@ -57,20 +57,20 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
-    private void createUserDocument(FirebaseUser user, String username) {
-        Map<String, Object> userDoc = new HashMap<>();
-
-        userDoc.put("email", user.getEmail());
-        userDoc.put("username", username);
-        userDoc.put("createdAt", FieldValue.serverTimestamp());
-
-        db.collection("users").document(user.getUid()).set(userDoc).addOnSuccessListener(v -> Log.d(TAG, "User profile created")).addOnFailureListener(e -> Log.w(TAG, "Error creating user profile" + e.toString()));
-    }
-
+//    private void createUserDocument(FirebaseUser user, String username) {
+//        Map<String, Object> userDoc = new HashMap<>();
+//
+//        userDoc.put("email", user.getEmail());
+//        userDoc.put("username", username);
+//        userDoc.put("createdAt", FieldValue.serverTimestamp());
+//
+//        db.collection("users").document(user.getUid()).set(userDoc).addOnSuccessListener(v -> Log.d(TAG, "User profile created")).addOnFailureListener(e -> Log.w(TAG, "Error creating user profile" + e.toString()));
+//    }
+//
     private void handleRegister() {
-         String username = usernameInput.getText().toString().trim();
-         String email = emailInput.getText().toString().trim();
-         String password = passwordInput.getText().toString().trim();
+         String username = Objects.requireNonNull(usernameInput.getText()).toString().trim();
+         String email = Objects.requireNonNull(emailInput.getText()).toString().trim();
+         String password = Objects.requireNonNull(passwordInput.getText()).toString().trim();
 
          if (username.isEmpty()) {
              usernameInput.setError("Username is required");
@@ -91,14 +91,28 @@ public class RegisterActivity extends AppCompatActivity {
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
 
-                FirebaseUser user = mAuth.getCurrentUser();
+                FirebaseUser firebaseUser = mAuth.getCurrentUser();
 
-                if (user != null) {
-                    createUserDocument(user, username);
+                if (firebaseUser != null) {
+
+                    // create instance of user class
+                    User user = new User(firebaseUser.getUid(), username, firebaseUser.getEmail());
+
+                    FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+                    db.collection("users").document(firebaseUser.getUid()).set(user).addOnSuccessListener(v -> {
+                        // user was created
+                        Log.d(TAG, "User was added to firebase");
+                        Toast.makeText(this, "User created", Toast.LENGTH_SHORT).show();
+                    }).addOnFailureListener(v -> {
+                        Log.d(TAG, "Failed to create user");
+                        Toast.makeText(this, "User was not created", Toast.LENGTH_SHORT).show();
+                    });
+
                     startActivity(new Intent(RegisterActivity.this, DashboardActivity.class));
                     finish();
                 } else {
-                    Toast.makeText(this, "User is null", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Firebase user is null", Toast.LENGTH_SHORT).show();
                 }
             } else {
                 Toast.makeText(this, "Registration failed", Toast.LENGTH_SHORT).show();

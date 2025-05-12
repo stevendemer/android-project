@@ -4,19 +4,19 @@
     android:id="@+id/profileScrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp">
+    android:fillViewport="true"
+    android:padding="22dp">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:layout_marginTop="30dp"
-        android:gravity="center_horizontal">
-
+        android:gravity="center"
+        >
         <!-- Username Field -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/usernameLayout"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            style="@style/Widget.Material3.TextInputLayout.FilledBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Username"
@@ -26,13 +26,14 @@
                 android:id="@+id/usernameEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="@android:color/primary_text_light"
                 android:inputType="textPersonName" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Email Field (readonly) -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/emailLayout"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            style="@style/Widget.Material3.TextInputLayout.FilledBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Email"
@@ -43,6 +44,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textEmailAddress"
+                android:textColor="@android:color/primary_text_light"
                 android:enabled="false" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -73,7 +75,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Select a profile image"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:textColor="@android:color/primary_text_light"
+            style="@style/Widget.Material3.Button.ElevatedButton"
             app:icon="@drawable/upload_24px"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="18dp" />
@@ -85,6 +88,7 @@
             android:layout_height="wrap_content"
             android:text="Upload image"
             style="@style/Widget.Material3.Button.TonalButton"
+            android:textColor="@android:color/primary_text_light"
             android:enabled="false"
             android:visibility="gone"
             android:layout_marginBottom="18dp" />
@@ -94,9 +98,9 @@
             android:id="@+id/saveProfileButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@android:color/primary_text_light"
             android:text="Save Changes"
             style="@style/Widget.Material3.Button.TonalButton"
             />
-
     </LinearLayout>
 </ScrollView>
