@@ -18,6 +18,8 @@ import org.w3c.dom.Text;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder> {
 
     private List<Transaction> transactions = new ArrayList<>();
@@ -28,6 +30,8 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     public static class TransactionViewHolder extends RecyclerView.ViewHolder {
         private final TextView textView;
         private final TextView incomeView;
+        private final TextView dateView;
+
 
         private final String TAG = "Element";
 
@@ -44,6 +48,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
             textView = (TextView) view.findViewById(R.id.titleText);
             incomeView = (TextView) view.findViewById(R.id.amountText);
+            dateView = (TextView) view.findViewById(R.id.dateText);
         }
 
         public View getTextView() {
@@ -53,6 +58,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         public View getIncomeView() {
             return incomeView;
         }
+        public TextView getDateView() { return dateView; }
     }
 
 
@@ -88,7 +94,11 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         Transaction transaction = transactions.get(position);
 
         viewHolder.textView.setText(transaction.getTitle());
+        viewHolder.textView.setTextColor(Color.WHITE);
 
+        SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH);
+        viewHolder.dateView.setText(formatter.format(transaction.getTimestamp()));
+        viewHolder.dateView.setTextColor(Color.WHITE);
         String prefix = transaction.isExpense() ? "-" : "+";
         @SuppressLint("DefaultLocale") String formattedAmount = String.format("%s$%.2f", prefix, transaction.getAmount());
 
