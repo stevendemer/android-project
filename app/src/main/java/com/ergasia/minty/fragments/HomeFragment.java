@@ -1,21 +1,38 @@
 package com.ergasia.minty.fragments;
 
+import android.annotation.SuppressLint;
+import android.graphics.Insets;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.widget.Button;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.OnApplyWindowInsetsListener;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.ergasia.minty.R;
+import com.ergasia.minty.TransactionAdapter;
+import com.ergasia.minty.entities.ExpenseCategory;
 import com.ergasia.minty.entities.Transaction;
 import com.google.android.material.materialswitch.MaterialSwitch;
-import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
@@ -25,12 +42,14 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
-import org.w3c.dom.Text;
-
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class HomeFragment extends Fragment {
 
@@ -40,20 +59,29 @@ public class HomeFragment extends Fragment {
     private TextView balanceTextView;
     private TextInputEditText transactionTextView;
     private Button makeTransactionButton;
+    private Button categoriesButton;
     private TextInputLayout incomeTextInputLayout;
+    private String selectedCategory;
 
-    // differentiates if income or expense
+    // differentiates if is income or expense
     private MaterialSwitch transactionTypeSwitch;
-
+    private RecyclerView recyclerView;
+    private TransactionAdapter transactionAdapter;
+    private List<Transaction> transactionsList = new ArrayList<>();
     private final String TAG = "HomeFragment";
 
     public HomeFragment() {
     }
 
+    @SuppressLint("WrongConstant")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
+
+        recyclerView = view.findViewById(R.id.expensesRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        transactionAdapter = new TransactionAdapter(transactionsList);
 
         usernameTextView = view.findViewById(R.id.usernameTextView);
         makeTransactionButton = view.findViewById(R.id.makeTransactionButton);
@@ -61,15 +89,71 @@ public class HomeFragment extends Fragment {
         transactionTextView = view.findViewById(R.id.editTransactionText);
         transactionTypeSwitch = view.findViewById(R.id.incomeSwitch);
         incomeTextInputLayout = view.findViewById(R.id.incomeTextInputLayout);
+        categoriesButton = view.findViewById(R.id.categoriesButton);
+
+        ConstraintLayout rootLayout = view.findViewById(R.id.homeRootLayout);
 
         db = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
 
+        recyclerView.setAdapter(transactionAdapter);
+
+        // disable the button if the switch is one
+        categoriesButton.setEnabled(!transactionTypeSwitch.isChecked());
+
+        DividerItemDecoration divider = new DividerItemDecoration(
+                recyclerView.getContext(),
+                DividerItemDecoration.VERTICAL
+        );
+
+        Drawable dividerDrawable = ContextCompat.getDrawable(getContext(), R.drawable.divider);
+
+        if (dividerDrawable != null) {
+            divider.setDrawable(dividerDrawable);
+        }
+
+        recyclerView.addItemDecoration(divider);
+        ViewCompat.setOnApplyWindowInsetsListener(rootLayout, new OnApplyWindowInsetsListener() {
+            @NonNull
+            @Override
+            public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                Insets systemBars = null;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                    systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars()).toPlatformInsets();
+                }
+
+                // apply top inset as padding
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+                }
+
+                return insets;
+            }
+        });
+
+        ViewCompat.setOnApplyWindowInsetsListener(recyclerView, (v, insets) -> {
+            Insets innerPadding = null;
+
+            int bottomInset = 0;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                bottomInset = insets.getInsets(WindowInsets.Type.systemBars()).bottom;
+            }
+            int left = v.getPaddingLeft();
+            int right = v.getPaddingRight();
+            int top = v.getPaddingTop();
+
+            v.setPadding(left, top, right, bottomInset);
+
+            return insets;
+        });
+
+        fetchTransactions();
+
+        // load the username and the current user's balance
         if (user != null) {
             db.collection("users").document(user.getUid()).get().addOnSuccessListener(documentSnapshot -> {
                 if (documentSnapshot.exists()) {
-                    usernameTextView.setText(documentSnapshot.getString("username"));
-                    getUserBalance();
+                    getBalanceAndUsername();
                     Log.d(TAG, "User found");
                 } else {
                     Log.d(TAG, "User not found");
@@ -79,7 +163,7 @@ public class HomeFragment extends Fragment {
             });
 
         } else {
-            Log.d(TAG, "User not logged in");
+            Log.d(TAG, "User is not logged in");
         }
 
         makeTransactionButton.setOnClickListener(v -> {
@@ -87,15 +171,53 @@ public class HomeFragment extends Fragment {
         });
 
         transactionTypeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            categoriesButton.setEnabled(!isChecked);
             if (isChecked) {
                 // income mode
                 incomeTextInputLayout.setHint("Enter income");
                 makeTransactionButton.setText(R.string.add_income);
+                transactionTypeSwitch.setText(R.string.income);
             } else {
                 // expense mode
                 incomeTextInputLayout.setHint("Enter expense");
                 makeTransactionButton.setText(R.string.add_expense);
+                transactionTypeSwitch.setText(R.string.expense);
+                categoriesButton.setVisibility(View.VISIBLE);
             }
+        });
+
+        categoriesButton.setOnClickListener(v -> {
+
+            PopupMenu popupMenu = new PopupMenu(getContext(), categoriesButton);
+            popupMenu.getMenuInflater().inflate(R.menu.category_menu, popupMenu.getMenu());
+
+            popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem menuItem) {
+
+                    selectedCategory = Objects.requireNonNull(menuItem.getTitle()).toString().trim();
+                    categoriesButton.setText(selectedCategory);
+
+                    if (menuItem.getItemId() == R.id.education) {
+                        Toast.makeText(getContext(), "Education ", Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
+                    if (menuItem.getItemId() == R.id.health) {
+                        Toast.makeText(getContext(), "Health", Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
+                    if (menuItem.getItemId() == R.id.groceries) {
+                        Toast.makeText(getContext(), "Groceries", Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
+                    if (menuItem.getItemId() == R.id.other) {
+                        Toast.makeText(getContext(), "Other", Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
+                    return false;
+                }
+            });
+            popupMenu.show();
         });
 
         return view;
@@ -104,13 +226,23 @@ public class HomeFragment extends Fragment {
     private void storeTransaction() {
         String amountText = Objects.requireNonNull(transactionTextView.getText()).toString().trim();
 
+        if (amountText.isEmpty()) {
+            transactionTextView.setError("Please enter a valid amount");
+            return;
+        }
+
+        double amount;
+        try {
+            amount = Double.parseDouble(amountText);
+        } catch (NumberFormatException ex) {
+            transactionTextView.setError("Invalid number format");
+            return;
+        }
+
         if (user != null) {
-            // Update the income of the user
-            Transaction transaction = new Transaction(UUID.randomUUID().toString(), user.getUid(), "Salary", Double.parseDouble(amountText), new Date());
-
             DocumentReference userDocRef = db.collection("users").document(user.getUid());
-            double amount = Double.parseDouble(amountText);
 
+            // add to the balance
             boolean isIncome = transactionTypeSwitch.isChecked();
 
             userDocRef.get().addOnSuccessListener(snapshot -> {
@@ -136,48 +268,68 @@ public class HomeFragment extends Fragment {
                     Log.e(TAG, "Failed to update balance " + e.toString());
                 });
 
-                // store the transaction
-                db.collection("users").document(user.getUid()).collection("transactions").document(transaction.getId()).set(transaction).addOnSuccessListener(v -> {
-                    Log.d(TAG, "Transaction added");
-                    Toast.makeText(getContext(), "Transaction added !", Toast.LENGTH_SHORT).show();
-                }).addOnFailureListener(v -> {
-                    Log.d(TAG, "Transaction failed");
-                    Toast.makeText(getContext(), "Transaction failed !", Toast.LENGTH_SHORT).show();
-                });
+                if (isIncome) {
+                    Transaction transaction = new Transaction(UUID.randomUUID().toString(), user.getUid(), amount);
 
-                db.collection("users").document(user.getUid()).collection("transactions").document(transaction.getId()).set(transaction)
-                        .addOnSuccessListener(v -> {
-                            Log.d(TAG, "Transaction added");
-                            transactionTextView.setText("");
-                        }).addOnFailureListener(v -> {
-                            Log.d(TAG, "Transaction failed");
-                            Toast.makeText(getContext(), "Transaction failed !", Toast.LENGTH_SHORT).show();
-                            transactionTextView.setText("");
-                        });
-            });
-        }
-    }
+                    db.collection("users").document(user.getUid()).collection("transactions").document(transaction.getId()).set(transaction)
+                            .addOnSuccessListener(v -> {
+                                Log.d(TAG, "Transaction added");
+                                transactionTextView.setText("");
+                            }).addOnFailureListener(v -> {
+                                Log.d(TAG, "Transaction failed");
+                                Toast.makeText(getContext(), "Transaction failed !", Toast.LENGTH_SHORT).show();
+                                transactionTextView.setText("");
+                            });
 
-    private void getTransactionsList() {
-
-        if (user != null) {
-            String userId = user.getUid();
-
-            db.collection("users").document(userId).collection("transactions").get().addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    for (DocumentSnapshot document : task.getResult()) {
-                        Transaction transaction = document.toObject(Transaction.class);
-                        assert transaction != null;
-                        Log.d(TAG, "Transaction: " + transaction.toString());
-                    }
                 } else {
-                    Log.e(TAG, "Error getting transactions " + task.getException());
+                    ExpenseCategory expenseCategory = mapExpenseCategory(selectedCategory);
+                    Transaction transaction = new Transaction(UUID.randomUUID().toString(), user.getUid(), amount, expenseCategory);
+                    db.collection("users").document(user.getUid()).collection("transactions").document(transaction.getId()).set(transaction)
+                            .addOnSuccessListener(v -> {
+                                Log.d(TAG, "Transaction added");
+                                transactionTextView.setText("");
+                            }).addOnFailureListener(v -> {
+                                Log.d(TAG, "Transaction failed");
+                                Toast.makeText(getContext(), "Transaction failed !", Toast.LENGTH_SHORT).show();
+                                transactionTextView.setText("");
+                            });
                 }
             });
         }
     }
 
-    private void getUserBalance() {
+    private void fetchTransactions() {
+
+        if (user == null) return;
+
+        // fetch the most recent transactions from the db
+        db.collection("users").document(user.getUid()).collection("transactions").orderBy("timestamp", Query.Direction.DESCENDING).limit(20).addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                if (error != null) {
+                    Log.e(TAG, "Error fetching real time transactions");
+                    return;
+                }
+
+                if (value != null) {
+                    // clear for duplicates
+                    transactionsList.clear();
+                    for (DocumentSnapshot document : value.getDocuments()) {
+                        Transaction transaction = document.toObject(Transaction.class);
+                        if (transaction != null) {
+                            transactionsList.add(transaction);
+                        }
+                    }
+                }
+
+                Log.d(TAG, "Fetched : " + transactionsList.size() + " transactions");
+                // notify adapter
+                transactionAdapter.notifyDataSetChanged();
+            }
+        });
+    }
+
+    private void getBalanceAndUsername() {
         if (user != null) {
             String userId = user.getUid();
             DocumentReference userRef = db.collection("users").document(userId);
@@ -194,10 +346,29 @@ public class HomeFragment extends Fragment {
 
                         String balanceText = getString(R.string.your_balance, balance);
                         balanceTextView.setText(balanceText);
+                        usernameTextView.setText(value.getString("username"));
                     }
                 }
             });
         }
     }
 
+    private ExpenseCategory mapExpenseCategory(String category) {
+        if (category == null) return ExpenseCategory.OTHER;
+
+        switch (category.toLowerCase().trim()) {
+            case "education":
+                return ExpenseCategory.EDUCATION;
+            case "health":
+                return ExpenseCategory.HEALTH;
+            case "groceries":
+                return ExpenseCategory.GROCERIES;
+            case "entertainment":
+                return ExpenseCategory.ENTERTAINMENT;
+            case "transport":
+                return ExpenseCategory.TRANSPORT;
+            default:
+                return ExpenseCategory.OTHER;
+        }
+    }
 }

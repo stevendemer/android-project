@@ -2,16 +2,22 @@ package com.ergasia.minty.entities;
 
 import androidx.annotation.NonNull;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class Transaction {
 
     private String id;
-    private String title;
     private double amount;
     private String category; // only used for expenses
     private String userId;
     private Date timestamp;
+
+    private String description;
+    private boolean expense;
     private TransactionType transactionType;
 
     public Transaction() {
@@ -19,25 +25,25 @@ public class Transaction {
 
 
     // when the transaction is income
-    public Transaction(String id, String userId, String title,  double amount, Date timestamp) {
+    public Transaction(String id, String userId, double amount) {
         this.id = id;
         this.userId = userId;
-        this.title = title;
         this.amount = amount;
-        this.timestamp = timestamp;
         this.category = null;
         this.transactionType = TransactionType.INCOME;
+        this.timestamp = new Date();
+        this.description = null;
     }
 
     // for expenses
-    public Transaction(String id, String userId, String title, double amount, Date timestamp, ExpenseCategory category) {
+    public Transaction(String id, String userId, double amount, ExpenseCategory category) {
         this.id = id;
         this.userId = userId;
-        this.title = title;
         this.amount = amount;
         this.category = category.name(); // store enum as string
         this.transactionType = TransactionType.EXPENSE;
-        this.timestamp = timestamp;
+        this.timestamp = new Date();
+        this.description = null;
     }
 
     public void setUserId(String userId) {
@@ -64,14 +70,6 @@ public class Transaction {
         this.id = id;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
     public double getAmount() {
         return amount;
     }
@@ -88,20 +86,20 @@ public class Transaction {
         this.category = category;
     }
 
-    public Date getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
-    }
-
     public TransactionType getTransactionType() {
         return transactionType;
     }
 
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
     public void setTransactionType(TransactionType transactionType) {
         this.transactionType = transactionType;
+    }
+
+    public void setExpense(boolean expense) {
+        this.expense = expense;
     }
 
     @NonNull
@@ -109,11 +107,9 @@ public class Transaction {
     public String toString() {
         return "Transaction{" +
                 "id='" + id + '\'' +
-                ", title='" + title + '\'' +
                 ", amount=" + amount +
                 ", category='" + category + '\'' +
                 ", userId='" + userId + '\'' +
-                ", timestamp=" + timestamp +
                 ", transactionType=" + transactionType +
                 '}';
     }

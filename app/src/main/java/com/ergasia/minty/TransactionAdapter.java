@@ -15,19 +15,24 @@ import com.ergasia.minty.entities.Transaction;
 
 import org.w3c.dom.Text;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder> {
 
     private List<Transaction> transactions = new ArrayList<>();
+    private final String TAG = "TransactionAdapter";
 
     /**
      * Provide a reference to the type of views that you are using
+     * ViewHolder provides all the functionality for the list items
      */
     public static class TransactionViewHolder extends RecyclerView.ViewHolder {
         private final TextView textView;
         private final TextView incomeView;
+//        private final TextView dateTextView;
 
         private final String TAG = "Element";
 
@@ -41,9 +46,9 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
                 }
             });
 
-
-            textView = (TextView) view.findViewById(R.id.titleText);
-            incomeView = (TextView) view.findViewById(R.id.amountText);
+            textView = (TextView) view.findViewById(R.id.transactionTitleText);
+            incomeView = (TextView) view.findViewById(R.id.transactionAmountText);
+//            dateTextView = (TextView) view.findViewById(R.id.dateTextView);
         }
 
         public View getTextView() {
@@ -53,6 +58,10 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         public View getIncomeView() {
             return incomeView;
         }
+
+//        public View getDateTextView() {
+//            return dateTextView;
+//        }
     }
 
 
@@ -66,8 +75,9 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
     /**
      * Create new views (invoked by the layout manager)
-     * @param parent The ViewGroup into which the new View will be added after it is bound to
-     *               an adapter position.
+     *
+     * @param parent   The ViewGroup into which the new View will be added after it is bound to
+     *                 an adapter position.
      * @param viewType The view type of the new View.
      */
     @NonNull
@@ -83,11 +93,19 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     @Override
     public void onBindViewHolder(@NonNull TransactionAdapter.TransactionViewHolder viewHolder, int position) {
 
+        Log.d(TAG, "Element is at " + position + " set.");
+
         // Get element from your dataset at this position and replace the contents
         // of the view with that element
         Transaction transaction = transactions.get(position);
 
-        viewHolder.textView.setText(transaction.getTitle());
+        if (transaction.isExpense()) {
+            viewHolder.textView.setText(transaction.getCategory().trim());
+            viewHolder.textView.setVisibility(View.VISIBLE);
+        } else {
+            viewHolder.textView.setText(R.string.income);
+//            viewHolder.textView.setVisibility(View.GONE);
+        }
 
         String prefix = transaction.isExpense() ? "-" : "+";
         @SuppressLint("DefaultLocale") String formattedAmount = String.format("%s$%.2f", prefix, transaction.getAmount());

@@ -22,4 +22,13 @@
     <string name="expense">Expense</string>
     <string name="add_expense">Add expense</string>
     <string name="add_income">Add income</string>
+    <string name="dollar">Dollar sign</string>
+    <string name="groceries">Groceries</string>
+    <string name="transportation">Transportation</string>
+    <string name="entertainment">Entertainment</string>
+    <string name="health">Health</string>
+    <string name="other">Other</string>
+    <string name="select_category">Pick expense</string>
+    <string name="login_title">Login with your account</string>
+    <string name="education">Education</string>
 </resources>

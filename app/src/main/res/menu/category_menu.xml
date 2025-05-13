@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/education"
+        android:title="@string/education" />
+    <item
+        android:id="@+id/health"
+        android:title="@string/health" />
+    <item
+        android:id="@+id/entertainment"
+        android:title="@string/entertainment" />
+    <item
+        android:id="@+id/groceries"
+        android:title="@string/groceries" />
+    <item
+        android:id="@+id/transportation"
+        android:title="@string/transportation" />
+    <item
+        android:id="@+id/other"
+        android:title="@string/other" />
+</menu>
