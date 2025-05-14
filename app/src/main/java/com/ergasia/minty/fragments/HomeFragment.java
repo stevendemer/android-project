@@ -83,6 +83,7 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
+
         recyclerView = view.findViewById(R.id.expensesRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         transactionAdapter = new TransactionAdapter(transactionsList);
@@ -93,8 +94,8 @@ public class HomeFragment extends Fragment {
         transactionTextView = view.findViewById(R.id.editTransactionText);
         transactionTypeSwitch = view.findViewById(R.id.incomeSwitch);
         incomeTextInputLayout = view.findViewById(R.id.incomeTextInputLayout);
-        categoriesDropdown = view.findViewById(R.id.categoriesDropdown);
         categoriesMenu = view.findViewById(R.id.categoriesMenu);
+        categoriesDropdown = view.findViewById(R.id.categoriesDropdown);
 
         ConstraintLayout rootLayout = view.findViewById(R.id.homeRootLayout);
 
@@ -102,25 +103,26 @@ public class HomeFragment extends Fragment {
         user = FirebaseAuth.getInstance().getCurrentUser();
         recyclerView.setAdapter(transactionAdapter);
 
+
         String[] categories = getResources().getStringArray(R.array.categories_array);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                getContext(),
+                requireContext(),
                 android.R.layout.simple_dropdown_item_1line,
                 categories
         );
 
         categoriesDropdown.setAdapter(adapter);
-
         // specify the layout to use when the list appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
 
         DividerItemDecoration divider = new DividerItemDecoration(
                 recyclerView.getContext(),
                 DividerItemDecoration.VERTICAL
         );
 
-        Drawable dividerDrawable = ContextCompat.getDrawable(getContext(), R.drawable.divider);
+        Drawable dividerDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.divider);
 
         if (dividerDrawable != null) {
             divider.setDrawable(dividerDrawable);
@@ -353,5 +355,26 @@ public class HomeFragment extends Fragment {
             default:
                 return ExpenseCategory.OTHER;
         }
+    }
+
+
+    private void resetCategoriesDropdown() {
+        String[] categories = getResources().getStringArray(R.array.categories_array);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                requireContext(),
+                android.R.layout.simple_dropdown_item_1line,
+                categories
+        );
+
+        categoriesDropdown.setAdapter(adapter);
+        categoriesDropdown.setText("", false); // Clear the selection but don't trigger dropdown
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        resetCategoriesDropdown();
     }
 }
