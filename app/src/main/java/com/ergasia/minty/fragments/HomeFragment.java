@@ -36,6 +36,7 @@ import com.ergasia.minty.R;
 import com.ergasia.minty.TransactionAdapter;
 import com.ergasia.minty.entities.ExpenseCategory;
 import com.ergasia.minty.entities.Transaction;
+import com.google.android.material.divider.MaterialDivider;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -67,6 +68,8 @@ public class HomeFragment extends Fragment {
     private TextInputLayout incomeTextInputLayout;
     private TextInputLayout categoriesMenu;
 
+    private MaterialDivider divider;
+
     // differentiates if is income or expense
     private MaterialSwitch transactionTypeSwitch;
     private RecyclerView recyclerView;
@@ -95,27 +98,28 @@ public class HomeFragment extends Fragment {
         transactionTypeSwitch = view.findViewById(R.id.incomeSwitch);
         incomeTextInputLayout = view.findViewById(R.id.incomeTextInputLayout);
         categoriesMenu = view.findViewById(R.id.categoriesMenu);
-        categoriesDropdown = view.findViewById(R.id.categoriesDropdown);
 
         ConstraintLayout rootLayout = view.findViewById(R.id.homeRootLayout);
+
 
         db = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
         recyclerView.setAdapter(transactionAdapter);
 
-
         String[] categories = getResources().getStringArray(R.array.categories_array);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 requireContext(),
-                android.R.layout.simple_dropdown_item_1line,
+                R.layout.dropdown_item,
+                R.id.dropdownItemText,
                 categories
         );
+
+        categoriesDropdown = view.findViewById(R.id.categoriesDropdown);
 
         categoriesDropdown.setAdapter(adapter);
         // specify the layout to use when the list appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
 
         DividerItemDecoration divider = new DividerItemDecoration(
                 recyclerView.getContext(),
@@ -357,13 +361,13 @@ public class HomeFragment extends Fragment {
         }
     }
 
-
     private void resetCategoriesDropdown() {
         String[] categories = getResources().getStringArray(R.array.categories_array);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 requireContext(),
-                android.R.layout.simple_dropdown_item_1line,
+                R.layout.dropdown_item,
+                R.id.dropdownItemText,
                 categories
         );
 

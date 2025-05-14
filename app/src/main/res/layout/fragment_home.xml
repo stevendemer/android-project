@@ -85,45 +85,16 @@
                 app:layout_constraintTop_toBottomOf="@id/incomeTextInputLayout" />
 
 
-            <!--            <Spinner-->
-            <!--                android:id="@+id/categoriesSpinner"-->
-            <!--                android:layout_width="0dp"-->
-            <!--                android:layout_height="wrap_content"-->
-            <!--                android:layout_gravity="right"-->
-            <!--                android:layout_marginTop="12dp"-->
-            <!--                android:layout_weight="1"-->
-            <!--                android:background="@drawable/spinner_border"-->
-            <!--                android:entries="@array/categories_array"-->
-            <!--                android:gravity="center"-->
-            <!--                android:paddingHorizontal="12dp"-->
-            <!--                android:paddingVertical="4dp"-->
-            <!--                android:popupBackground="@color/md_theme_background_highContrast"-->
-            <!--                android:spinnerMode="dropdown"-->
-            <!--                android:textAlignment="center"-->
-            <!--                android:textColor="@color/md_theme_onPrimary"-->
-            <!--                android:textSize="12sp"-->
-            <!--                android:backgroundTint="@color/md_theme_primary_highContrast"-->
-            <!--                android:visibility="gone"-->
-            <!--                app:icon="@drawable/expand_circle_down_24px"-->
-            <!--                app:iconTint="@color/md_theme_onPrimary"-->
-            <!--                app:layout_constraintBottom_toBottomOf="parent"-->
-            <!--                app:layout_constraintEnd_toEndOf="parent"-->
-            <!--                app:layout_constraintStart_toStartOf="parent"-->
-            <!--                app:layout_constraintTop_toTopOf="parent"-->
-            <!--                app:strokeColor="@color/md_theme_onPrimary"-->
-            <!--                app:strokeWidth="1dp"-->
-            <!--                tools:ignore="RtlHardcoded" />-->
-
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/categoriesMenu"
                 style="@style/Widget.Material3.TextInputLayout.FilledBox.Dense.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/select_category"
-                app:boxStrokeColor="@color/md_theme_background"
                 android:visibility="gone"
-                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium"
-                app:endIconMode="dropdown_menu">
+                app:boxStrokeColor="@color/md_theme_background"
+                app:endIconMode="dropdown_menu"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium">
 
                 <AutoCompleteTextView
                     android:id="@+id/categoriesDropdown"
