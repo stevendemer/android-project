@@ -16,11 +16,13 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.Objects;
+
 public class DashboardActivity extends AppCompatActivity {
 
-    private  FirebaseAuth mAuth;
-    private MaterialToolbar topbar;
+    private FirebaseAuth mAuth;
     private static final String TAG = "DashboardActivity"; // Tag for logs
+
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,12 +30,11 @@ public class DashboardActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_dashboard);
 
-        MaterialToolbar toolbar = findViewById(R.id.top_bar);
-        setSupportActionBar(toolbar);
-
         // get the navigation controller
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host);
         NavController navController = navHostFragment.getNavController();
+
+        Objects.requireNonNull(getSupportActionBar()).setTitle("Minty");
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         NavigationUI.setupWithNavController(bottomNavigationView, navController);
@@ -46,7 +47,6 @@ public class DashboardActivity extends AppCompatActivity {
     }
 
     private void logoutUser() {
-
         mAuth = FirebaseAuth.getInstance();
 
         // log out from firebase and go to login page

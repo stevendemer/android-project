@@ -8,41 +8,10 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/dark_purple_background"
-        android:scaleType="centerCrop"
-        android:contentDescription="@string/background"
         android:alpha="0.9"
-        />
-
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/topbar_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:elevation="4dp"
-        app:layout_constraintEnd_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        >
-        <com.google.android.material.appbar.MaterialToolbar
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:menu="@menu/top_app_bar"
-            app:navigationIcon="@drawable/menu_24px"
-            app:title="Minty"
-            android:id="@+id/top_bar"
-            app:titleTextColor="@color/md_theme_primary_highContrast"
-            app:popupTheme="@style/MaterialAlertDialog.Material3"
-        />
-    </com.google.android.material.appbar.AppBarLayout>
-
-<!--    <Button-->
-<!--        android:id="@+id/logoutButton"-->
-<!--        style="@style/Widget.Material3.Button.TextButton"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:text="Logout"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent" />-->
+        android:contentDescription="@string/background"
+        android:scaleType="centerCrop"
+        android:src="@drawable/dark_purple_background" />
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host"
@@ -53,7 +22,6 @@
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/topbar_layout"
         app:navGraph="@navigation/nav_graph" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView

@@ -19,11 +19,4 @@
         android:layout_height="wrap_content"
         app:drawableStartCompat="@drawable/ic_attach_money" />
 
-    <!--    <TextView-->
-    <!--        android:id="@+id/dateTextView"-->
-    <!--        android:layout_width="wrap_content"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:textColor="@color/md_theme_onPrimary"-->
-    <!--        android:textSize="@dimen/material_emphasis_medium"-->
-    <!--    />-->
 </LinearLayout>

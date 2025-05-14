@@ -14,9 +14,9 @@
     <!-- Transactions Fragment -->
     <fragment
         android:id="@+id/nav_transactions"
-        android:name="com.ergasia.minty.fragments.ExpensesFragment"
+        android:name="com.ergasia.minty.fragments.TransactionsFragment"
         android:label="Transactions"
-        android:layout="@layout/fragment_expenses" />
+        android:layout="@layout/fragment_transactions" />
 
     <!-- Add Fragment -->
     <fragment

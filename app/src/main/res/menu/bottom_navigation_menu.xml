@@ -9,7 +9,7 @@
             android:id="@+id/nav_transactions"
             android:enabled="true"
             android:icon="@drawable/monitoring_24px"
-            android:title="@string/expenses" />
+            android:title="@string/transactions" />
         <item
             android:id="@+id/nav_profile"
             android:enabled="true"

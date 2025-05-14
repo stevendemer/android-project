@@ -11,8 +11,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.PopupMenu;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,9 +63,9 @@ public class HomeFragment extends Fragment {
     private TextView balanceTextView;
     private TextInputEditText transactionTextView;
     private Button makeTransactionButton;
-    private Button categoriesButton;
+    private AutoCompleteTextView categoriesDropdown;
     private TextInputLayout incomeTextInputLayout;
-    private String selectedCategory;
+    private TextInputLayout categoriesMenu;
 
     // differentiates if is income or expense
     private MaterialSwitch transactionTypeSwitch;
@@ -89,17 +93,27 @@ public class HomeFragment extends Fragment {
         transactionTextView = view.findViewById(R.id.editTransactionText);
         transactionTypeSwitch = view.findViewById(R.id.incomeSwitch);
         incomeTextInputLayout = view.findViewById(R.id.incomeTextInputLayout);
-        categoriesButton = view.findViewById(R.id.categoriesButton);
+        categoriesDropdown = view.findViewById(R.id.categoriesDropdown);
+        categoriesMenu = view.findViewById(R.id.categoriesMenu);
 
         ConstraintLayout rootLayout = view.findViewById(R.id.homeRootLayout);
 
         db = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
-
         recyclerView.setAdapter(transactionAdapter);
 
-        // disable the button if the switch is one
-        categoriesButton.setEnabled(!transactionTypeSwitch.isChecked());
+        String[] categories = getResources().getStringArray(R.array.categories_array);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                getContext(),
+                android.R.layout.simple_dropdown_item_1line,
+                categories
+        );
+
+        categoriesDropdown.setAdapter(adapter);
+
+        // specify the layout to use when the list appears
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         DividerItemDecoration divider = new DividerItemDecoration(
                 recyclerView.getContext(),
@@ -132,7 +146,6 @@ public class HomeFragment extends Fragment {
         });
 
         ViewCompat.setOnApplyWindowInsetsListener(recyclerView, (v, insets) -> {
-            Insets innerPadding = null;
 
             int bottomInset = 0;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
@@ -171,53 +184,19 @@ public class HomeFragment extends Fragment {
         });
 
         transactionTypeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            categoriesButton.setEnabled(!isChecked);
             if (isChecked) {
                 // income mode
                 incomeTextInputLayout.setHint("Enter income");
                 makeTransactionButton.setText(R.string.add_income);
                 transactionTypeSwitch.setText(R.string.income);
+                categoriesMenu.setVisibility(View.GONE);
             } else {
                 // expense mode
                 incomeTextInputLayout.setHint("Enter expense");
                 makeTransactionButton.setText(R.string.add_expense);
                 transactionTypeSwitch.setText(R.string.expense);
-                categoriesButton.setVisibility(View.VISIBLE);
+                categoriesMenu.setVisibility(View.VISIBLE);
             }
-        });
-
-        categoriesButton.setOnClickListener(v -> {
-
-            PopupMenu popupMenu = new PopupMenu(getContext(), categoriesButton);
-            popupMenu.getMenuInflater().inflate(R.menu.category_menu, popupMenu.getMenu());
-
-            popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem menuItem) {
-
-                    selectedCategory = Objects.requireNonNull(menuItem.getTitle()).toString().trim();
-                    categoriesButton.setText(selectedCategory);
-
-                    if (menuItem.getItemId() == R.id.education) {
-                        Toast.makeText(getContext(), "Education ", Toast.LENGTH_SHORT).show();
-                        return true;
-                    }
-                    if (menuItem.getItemId() == R.id.health) {
-                        Toast.makeText(getContext(), "Health", Toast.LENGTH_SHORT).show();
-                        return true;
-                    }
-                    if (menuItem.getItemId() == R.id.groceries) {
-                        Toast.makeText(getContext(), "Groceries", Toast.LENGTH_SHORT).show();
-                        return true;
-                    }
-                    if (menuItem.getItemId() == R.id.other) {
-                        Toast.makeText(getContext(), "Other", Toast.LENGTH_SHORT).show();
-                        return true;
-                    }
-                    return false;
-                }
-            });
-            popupMenu.show();
         });
 
         return view;
@@ -232,6 +211,7 @@ public class HomeFragment extends Fragment {
         }
 
         double amount;
+
         try {
             amount = Double.parseDouble(amountText);
         } catch (NumberFormatException ex) {
@@ -239,11 +219,12 @@ public class HomeFragment extends Fragment {
             return;
         }
 
+
+        // add to the balance
+        boolean isIncome = transactionTypeSwitch.isChecked();
+
         if (user != null) {
             DocumentReference userDocRef = db.collection("users").document(user.getUid());
-
-            // add to the balance
-            boolean isIncome = transactionTypeSwitch.isChecked();
 
             userDocRef.get().addOnSuccessListener(snapshot -> {
                 Double currentBalance = snapshot.getDouble("balance");
@@ -282,6 +263,8 @@ public class HomeFragment extends Fragment {
                             });
 
                 } else {
+
+                    String selectedCategory = categoriesDropdown.getText().toString().trim();
                     ExpenseCategory expenseCategory = mapExpenseCategory(selectedCategory);
                     Transaction transaction = new Transaction(UUID.randomUUID().toString(), user.getUid(), amount, expenseCategory);
                     db.collection("users").document(user.getUid()).collection("transactions").document(transaction.getId()).set(transaction)
@@ -303,7 +286,7 @@ public class HomeFragment extends Fragment {
         if (user == null) return;
 
         // fetch the most recent transactions from the db
-        db.collection("users").document(user.getUid()).collection("transactions").orderBy("timestamp", Query.Direction.DESCENDING).limit(20).addSnapshotListener(new EventListener<QuerySnapshot>() {
+        db.collection("users").document(user.getUid()).collection("transactions").orderBy("timestamp", Query.Direction.DESCENDING).limit(10).addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
                 if (error != null) {
