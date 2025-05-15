@@ -54,8 +54,6 @@ import java.util.Objects;
 public class ProfileFragment extends Fragment {
 
     private TextInputEditText usernameEdit;
-
-    private TextView transactionsAmount;
     private TextInputEditText emailEditText;
     private MaterialButton updateProfileButton;
     private FirebaseAuth mAuth;
@@ -73,7 +71,6 @@ public class ProfileFragment extends Fragment {
         usernameEdit = view.findViewById(R.id.usernameEditText);
         emailEditText = view.findViewById(R.id.emailEditText);
         updateProfileButton = view.findViewById(R.id.saveProfileButton);
-        transactionsAmount = view.findViewById(R.id.transactionsText);
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
@@ -95,7 +92,6 @@ public class ProfileFragment extends Fragment {
                         int transactionsCount = (int) snapshot.getCount(); // get the count
                         Log.d("Firestore", "Total transactions: " + transactionsCount);
 
-                        transactionsAmount.setText("Total transactions: " + transactionsCount);
                     } else {
                         Log.d("Firestore", "Count failed: " + task.getException());
                     }

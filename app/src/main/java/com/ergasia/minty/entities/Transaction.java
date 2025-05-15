@@ -2,11 +2,11 @@ package com.ergasia.minty.entities;
 
 import androidx.annotation.NonNull;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.FieldValue;
+
+import java.sql.Time;
 import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
 
 public class Transaction {
 
@@ -14,8 +14,7 @@ public class Transaction {
     private double amount;
     private String category; // only used for expenses
     private String userId;
-    private Date timestamp;
-
+    private Timestamp timestamp;
     private String description;
     private boolean expense;
     private TransactionType transactionType;
@@ -29,10 +28,10 @@ public class Transaction {
         this.id = id;
         this.userId = userId;
         this.amount = amount;
-        this.category = null;
         this.transactionType = TransactionType.INCOME;
-        this.timestamp = new Date();
         this.description = null;
+        this.timestamp = null;
+        this.category = null;
     }
 
     // for expenses
@@ -42,8 +41,20 @@ public class Transaction {
         this.amount = amount;
         this.category = category.name(); // store enum as string
         this.transactionType = TransactionType.EXPENSE;
-        this.timestamp = new Date();
         this.description = null;
+        this.timestamp = null;
+    }
+
+    public Timestamp getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Timestamp timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public void setUserId(String userId) {
@@ -55,11 +66,11 @@ public class Transaction {
     }
 
     public boolean isExpense() {
-        return this.transactionType == TransactionType.EXPENSE;
+        return !("income".equalsIgnoreCase(category));
     }
 
     public boolean isIncome() {
-        return this.transactionType == TransactionType.INCOME;
+        return "income".equalsIgnoreCase(category);
     }
 
     public String getId() {
@@ -79,7 +90,7 @@ public class Transaction {
     }
 
     public String getCategory() {
-        return category;
+        return category != null ? category : TransactionType.INCOME.name();
     }
 
     public void setCategory(String category) {
@@ -88,10 +99,6 @@ public class Transaction {
 
     public TransactionType getTransactionType() {
         return transactionType;
-    }
-
-    public Date getTimestamp() {
-        return timestamp;
     }
 
     public void setTransactionType(TransactionType transactionType) {

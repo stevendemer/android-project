@@ -50,6 +50,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:hint="@string/amount"
+            app:boxBackgroundMode="filled"
+            app:boxStrokeWidth="0dp"
+            app:boxStrokeWidthFocused="0dp"
             app:endIconMode="clear_text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -62,7 +65,9 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:backgroundTint="@color/md_theme_background_highContrast"
-                android:inputType="numberDecimal" />
+                android:inputType="numberDecimal"
+                app:boxStrokeWidth="0dp"
+                app:boxStrokeWidthFocused="0dp" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <LinearLayout
@@ -90,23 +95,25 @@
                 style="@style/Widget.Material3.TextInputLayout.FilledBox.Dense.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+
+
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="8dp"
                 android:hint="@string/select_category"
                 android:visibility="gone"
-                app:boxStrokeColor="@color/md_theme_background"
-                app:endIconMode="dropdown_menu"
-                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium">
+                app:boxStrokeWidth="0dp"
+                app:boxStrokeWidthFocused="0dp"
+                app:endIconMode="dropdown_menu">
 
                 <AutoCompleteTextView
                     android:id="@+id/categoriesDropdown"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@color/md_theme_background"
-                    android:backgroundTint="@color/md_theme_background"
+                    android:layout_height="match_parent"
                     android:inputType="none"
-                    android:textColor="@color/md_theme_primary_highContrast"
-                    app:simpleItems="@array/categories_array" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    app:simpleItems="@array/categories_array"
+                    tools:ignore="LabelFor" />
 
+            </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
@@ -138,10 +145,10 @@
         android:id="@+id/expensesRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginBottom="12dp"
         android:clipToPadding="false"
         android:fitsSystemWindows="true"
         android:paddingTop="12dp"
-        android:paddingBottom="10dp"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

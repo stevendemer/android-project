@@ -12,18 +12,25 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ergasia.minty.entities.Transaction;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.FieldValue;
 
 import org.w3c.dom.Text;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 
 
 public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder> {
 
     private List<Transaction> transactions = new ArrayList<>();
-    private final String TAG = "TransactionAdapter";
 
     /**
      * Provide a reference to the type of views that you are using
@@ -32,8 +39,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     public static class TransactionViewHolder extends RecyclerView.ViewHolder {
         private final TextView textView;
         private final TextView incomeView;
-//        private final TextView dateTextView;
-
+        private final TextView dateTextView;
         private final String TAG = "Element";
 
         public TransactionViewHolder(View view) {
@@ -48,7 +54,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
             textView = (TextView) view.findViewById(R.id.transactionTitleText);
             incomeView = (TextView) view.findViewById(R.id.transactionAmountText);
-//            dateTextView = (TextView) view.findViewById(R.id.dateTextView);
+            dateTextView = (TextView) view.findViewById(R.id.dateTextView);
         }
 
         public View getTextView() {
@@ -59,11 +65,11 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
             return incomeView;
         }
 
-//        public View getDateTextView() {
-//            return dateTextView;
-//        }
-    }
+        public View getDateView() {
+            return dateTextView;
+        }
 
+    }
 
     public TransactionAdapter(List<Transaction> transactions) {
         this.transactions = transactions;
@@ -93,24 +99,22 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     @Override
     public void onBindViewHolder(@NonNull TransactionAdapter.TransactionViewHolder viewHolder, int position) {
 
-        Log.d(TAG, "Element is at " + position + " set.");
+        String TAG = "TransactionAdapter";
 
         // Get element from your dataset at this position and replace the contents
         // of the view with that element
         Transaction transaction = transactions.get(position);
 
-        if (transaction.isExpense()) {
-            viewHolder.textView.setText(transaction.getCategory().trim());
-            viewHolder.textView.setVisibility(View.VISIBLE);
-        } else {
-            viewHolder.textView.setText(R.string.income);
-//            viewHolder.textView.setVisibility(View.GONE);
-        }
+        Log.d(TAG, "Element is at " + transaction + " set.");
 
-        String prefix = transaction.isExpense() ? "-" : "+";
-        @SuppressLint("DefaultLocale") String formattedAmount = String.format("%s$%.2f", prefix, transaction.getAmount());
+        viewHolder.textView.setText(transaction.getCategory().trim());
 
-        int color = transaction.isExpense() ? Color.RED : Color.GREEN;
+        boolean isIncome = "income".equalsIgnoreCase(transaction.getCategory());
+
+        String prefix = isIncome ? "+" : "-";
+        @SuppressLint("DefaultLocale") String formattedAmount = String.format("%s$%.1f", prefix, transaction.getAmount());
+
+        int color = isIncome ? Color.GREEN : Color.RED;
 
         viewHolder.incomeView.setText(formattedAmount);
         viewHolder.incomeView.setTextColor(color);

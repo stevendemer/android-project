@@ -40,18 +40,24 @@ import com.google.android.material.divider.MaterialDivider;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
@@ -67,8 +73,6 @@ public class HomeFragment extends Fragment {
     private AutoCompleteTextView categoriesDropdown;
     private TextInputLayout incomeTextInputLayout;
     private TextInputLayout categoriesMenu;
-
-    private MaterialDivider divider;
 
     // differentiates if is income or expense
     private MaterialSwitch transactionTypeSwitch;
@@ -86,7 +90,6 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-
         recyclerView = view.findViewById(R.id.expensesRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         transactionAdapter = new TransactionAdapter(transactionsList);
@@ -98,9 +101,11 @@ public class HomeFragment extends Fragment {
         transactionTypeSwitch = view.findViewById(R.id.incomeSwitch);
         incomeTextInputLayout = view.findViewById(R.id.incomeTextInputLayout);
         categoriesMenu = view.findViewById(R.id.categoriesMenu);
+        categoriesDropdown = view.findViewById(R.id.categoriesDropdown);
 
         ConstraintLayout rootLayout = view.findViewById(R.id.homeRootLayout);
 
+        categoriesDropdown.setDropDownBackgroundResource(R.drawable.filter_dropdown_menu);
 
         db = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
@@ -118,21 +123,10 @@ public class HomeFragment extends Fragment {
         categoriesDropdown = view.findViewById(R.id.categoriesDropdown);
 
         categoriesDropdown.setAdapter(adapter);
+
         // specify the layout to use when the list appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        DividerItemDecoration divider = new DividerItemDecoration(
-                recyclerView.getContext(),
-                DividerItemDecoration.VERTICAL
-        );
-
-        Drawable dividerDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.divider);
-
-        if (dividerDrawable != null) {
-            divider.setDrawable(dividerDrawable);
-        }
-
-        recyclerView.addItemDecoration(divider);
         ViewCompat.setOnApplyWindowInsetsListener(rootLayout, new OnApplyWindowInsetsListener() {
             @NonNull
             @Override
@@ -258,7 +252,16 @@ public class HomeFragment extends Fragment {
                 if (isIncome) {
                     Transaction transaction = new Transaction(UUID.randomUUID().toString(), user.getUid(), amount);
 
-                    db.collection("users").document(user.getUid()).collection("transactions").document(transaction.getId()).set(transaction)
+                    Map<String, Object> transactionsMap = new HashMap<>();
+
+                    transactionsMap.put("id", transaction.getId());
+                    transactionsMap.put("userId", transaction.getUserId());
+                    transactionsMap.put("amount", transaction.getAmount());
+                    transactionsMap.put("category", transaction.getCategory());
+
+                    transactionsMap.put("timestamp", FieldValue.serverTimestamp());
+
+                    db.collection("users").document(user.getUid()).collection("transactions").document(transaction.getId()).set(transactionsMap)
                             .addOnSuccessListener(v -> {
                                 Log.d(TAG, "Transaction added");
                                 transactionTextView.setText("");
@@ -267,13 +270,19 @@ public class HomeFragment extends Fragment {
                                 Toast.makeText(getContext(), "Transaction failed !", Toast.LENGTH_SHORT).show();
                                 transactionTextView.setText("");
                             });
-
                 } else {
-
                     String selectedCategory = categoriesDropdown.getText().toString().trim();
                     ExpenseCategory expenseCategory = mapExpenseCategory(selectedCategory);
                     Transaction transaction = new Transaction(UUID.randomUUID().toString(), user.getUid(), amount, expenseCategory);
-                    db.collection("users").document(user.getUid()).collection("transactions").document(transaction.getId()).set(transaction)
+
+                    Map<String, Object> transactionMap = new HashMap<>();
+                    transactionMap.put("id", transaction.getId());
+                    transactionMap.put("userId", transaction.getUserId());
+                    transactionMap.put("amount", transaction.getAmount());
+                    transactionMap.put("timestamp", FieldValue.serverTimestamp());
+                    transactionMap.put("category", transaction.getCategory());
+
+                    db.collection("users").document(user.getUid()).collection("transactions").document(transaction.getId()).set(transactionMap)
                             .addOnSuccessListener(v -> {
                                 Log.d(TAG, "Transaction added");
                                 transactionTextView.setText("");
@@ -283,6 +292,9 @@ public class HomeFragment extends Fragment {
                                 transactionTextView.setText("");
                             });
                 }
+
+                // scroll to top on insertion
+                recyclerView.scrollToPosition(0);
             });
         }
     }
@@ -290,7 +302,6 @@ public class HomeFragment extends Fragment {
     private void fetchTransactions() {
 
         if (user == null) return;
-
         // fetch the most recent transactions from the db
         db.collection("users").document(user.getUid()).collection("transactions").orderBy("timestamp", Query.Direction.DESCENDING).limit(10).addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
@@ -304,8 +315,22 @@ public class HomeFragment extends Fragment {
                     // clear for duplicates
                     transactionsList.clear();
                     for (DocumentSnapshot document : value.getDocuments()) {
-                        Transaction transaction = document.toObject(Transaction.class);
-                        if (transaction != null) {
+//                        Transaction transaction = document.toObject(Transaction.class);
+                        String id = document.getString("id");
+                        String userId = document.getString("userId");
+                        Double amount = document.getDouble("amount");
+                        String category = document.getString("category");
+                        Timestamp timestamp = document.getTimestamp("timestamp");
+
+                        if (id != null && userId != null && amount != null) {
+                            Transaction transaction;
+                            if (category != null) {
+                                transaction = new Transaction(id, userId, amount, ExpenseCategory.valueOf(category));
+                            } else {
+                                transaction = new Transaction(id, userId, amount); // income
+                            }
+
+                            transaction.setTimestamp(timestamp);
                             transactionsList.add(transaction);
                         }
                     }
@@ -354,8 +379,8 @@ public class HomeFragment extends Fragment {
                 return ExpenseCategory.GROCERIES;
             case "entertainment":
                 return ExpenseCategory.ENTERTAINMENT;
-            case "transport":
-                return ExpenseCategory.TRANSPORT;
+            case "transportation":
+                return ExpenseCategory.TRANSPORTATION;
             default:
                 return ExpenseCategory.OTHER;
         }
@@ -378,7 +403,6 @@ public class HomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
         resetCategoriesDropdown();
     }
 }

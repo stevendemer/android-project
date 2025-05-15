@@ -34,6 +34,11 @@
     <string name="edit_your_profile">Edit your profile</string>
     <string name="total_transaction">"Total transactions: "</string>
     <string name="select_category">Select category</string>
+    <string name="filter_by_type">Filter by</string>
+    <string name="sort_by">Sort by</string>
+    <string name="profile_image">Profile image</string>
+    <string name="upload_image">Upload image</string>
+    <string name="save_changes">Save Changes</string>
     <string-array name="categories_array">
         <item>Groceries</item>
         <item>Education</item>
@@ -42,5 +47,13 @@
         <item>Health</item>
         <item>Other</item>
     </string-array>
+<string-array name="sort_array">
+    <item>Date (Newest)</item>
+    <item>Date (Oldest)</item>
+    <item>Amount (Greatest)</item>
+    <item>Amount (Least)</item>
+    <item>Category (Income)</item>
+    <item>Category (Expense)</item>
+</string-array>
 
 </resources>

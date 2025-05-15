@@ -2,9 +2,11 @@ package com.ergasia.minty.entities;
 
 public enum ExpenseCategory {
     GROCERIES,
-    TRANSPORT,
+    TRANSPORTATION,
     ENTERTAINMENT,
     OTHER,
     HEALTH,
-    EDUCATION
+    EDUCATION,
+    INCOME
+
 }
