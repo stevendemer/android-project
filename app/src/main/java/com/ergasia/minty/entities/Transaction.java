@@ -1,12 +1,12 @@
 package com.ergasia.minty.entities;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.FieldValue;
 
-import java.sql.Time;
-import java.util.Date;
+import java.util.Objects;
+
 
 public class Transaction {
 
@@ -16,7 +16,6 @@ public class Transaction {
     private String userId;
     private Timestamp timestamp;
     private String description;
-    private boolean expense;
     private TransactionType transactionType;
 
     public Transaction() {
@@ -105,8 +104,13 @@ public class Transaction {
         this.transactionType = transactionType;
     }
 
-    public void setExpense(boolean expense) {
-        this.expense = expense;
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+
+        Transaction that = (Transaction) obj;
+        return id.equals(that.id) && userId.equals(that.userId) && Objects.equals(category, that.category) && Objects.equals(timestamp, that.timestamp) && amount == that.amount;
     }
 
     @NonNull

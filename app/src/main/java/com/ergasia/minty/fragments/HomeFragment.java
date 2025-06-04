@@ -1,22 +1,19 @@
 package com.ergasia.minty.fragments;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.graphics.Color;
 import android.graphics.Insets;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.PopupMenu;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,44 +25,22 @@ import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ergasia.minty.R;
 import com.ergasia.minty.TransactionAdapter;
-import com.ergasia.minty.entities.ExpenseCategory;
-import com.ergasia.minty.entities.Transaction;
-import com.google.android.material.divider.MaterialDivider;
+import com.ergasia.minty.views.HomeViewModel;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.Timestamp;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QuerySnapshot;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class HomeFragment extends Fragment {
 
-    private FirebaseUser user;
-    private FirebaseFirestore db;
+    private HomeViewModel homeViewModel;
     private TextView usernameTextView;
     private TextView balanceTextView;
     private TextInputEditText transactionTextView;
@@ -74,55 +49,41 @@ public class HomeFragment extends Fragment {
     private TextInputLayout incomeTextInputLayout;
     private TextInputLayout categoriesMenu;
 
-    // differentiates if is income or expense
+    // whether income or expense
     private MaterialSwitch transactionTypeSwitch;
     private RecyclerView recyclerView;
     private TransactionAdapter transactionAdapter;
-    private List<Transaction> transactionsList = new ArrayList<>();
     private final String TAG = "HomeFragment";
 
     public HomeFragment() {
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+        transactionAdapter = new TransactionAdapter();
+    }
+
     @SuppressLint("WrongConstant")
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        recyclerView = view.findViewById(R.id.expensesRecyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        transactionAdapter = new TransactionAdapter(transactionsList);
+        setupViews(view);
 
-        usernameTextView = view.findViewById(R.id.usernameTextView);
-        makeTransactionButton = view.findViewById(R.id.makeTransactionButton);
-        balanceTextView = view.findViewById(R.id.balanceTextView);
-        transactionTextView = view.findViewById(R.id.editTransactionText);
-        transactionTypeSwitch = view.findViewById(R.id.incomeSwitch);
-        incomeTextInputLayout = view.findViewById(R.id.incomeTextInputLayout);
-        categoriesMenu = view.findViewById(R.id.categoriesMenu);
-        categoriesDropdown = view.findViewById(R.id.categoriesDropdown);
+        setupUI(view);
+
+        setupObservers();
 
         ConstraintLayout rootLayout = view.findViewById(R.id.homeRootLayout);
 
         categoriesDropdown.setDropDownBackgroundResource(R.drawable.filter_dropdown_menu);
 
-        db = FirebaseFirestore.getInstance();
-        user = FirebaseAuth.getInstance().getCurrentUser();
-        recyclerView.setAdapter(transactionAdapter);
-
         String[] categories = getResources().getStringArray(R.array.categories_array);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                requireContext(),
-                R.layout.dropdown_item,
-                R.id.dropdownItemText,
-                categories
-        );
-
-        categoriesDropdown = view.findViewById(R.id.categoriesDropdown);
-
-        categoriesDropdown.setAdapter(adapter);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.dropdown_item, R.id.dropdownItemText, categories);
 
         // specify the layout to use when the list appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -149,7 +110,7 @@ public class HomeFragment extends Fragment {
 
             int bottomInset = 0;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-                bottomInset = insets.getInsets(WindowInsets.Type.systemBars()).bottom;
+                bottomInset = insets.getInsets(WindowInsets.Type.statusBars()).bottom;
             }
             int left = v.getPaddingLeft();
             int right = v.getPaddingRight();
@@ -160,28 +121,7 @@ public class HomeFragment extends Fragment {
             return insets;
         });
 
-        fetchTransactions();
-
-        // load the username and the current user's balance
-        if (user != null) {
-            db.collection("users").document(user.getUid()).get().addOnSuccessListener(documentSnapshot -> {
-                if (documentSnapshot.exists()) {
-                    getBalanceAndUsername();
-                    Log.d(TAG, "User found");
-                } else {
-                    Log.d(TAG, "User not found");
-                }
-            }).addOnFailureListener(v -> {
-                Log.d(TAG, "Error finding document");
-            });
-
-        } else {
-            Log.d(TAG, "User is not logged in");
-        }
-
-        makeTransactionButton.setOnClickListener(v -> {
-            storeTransaction();
-        });
+        makeTransactionButton.setOnClickListener(v -> onSubmitTransaction());
 
         transactionTypeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
@@ -199,11 +139,87 @@ public class HomeFragment extends Fragment {
             }
         });
 
+
         return view;
     }
 
-    private void storeTransaction() {
+
+    private void setupUI(View view) {
+
+        recyclerView = view.findViewById(R.id.expensesRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+
+        usernameTextView = view.findViewById(R.id.usernameTextView);
+        makeTransactionButton = view.findViewById(R.id.makeTransactionButton);
+        balanceTextView = view.findViewById(R.id.balanceTextView);
+
+        // number entered in the input
+        transactionTextView = view.findViewById(R.id.editTransactionText);
+        transactionTypeSwitch = view.findViewById(R.id.incomeSwitch);
+        incomeTextInputLayout = view.findViewById(R.id.incomeTextInputLayout);
+        categoriesMenu = view.findViewById(R.id.categoriesMenu);
+        categoriesDropdown = view.findViewById(R.id.categoriesDropdown);
+
+        categoriesDropdown.setDropDownBackgroundResource(R.drawable.filter_dropdown_menu);
+    }
+
+    private void setupViews(View view) {
+
+        recyclerView = view.findViewById(R.id.expensesRecyclerView);
+        recyclerView.setAdapter(transactionAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setHasFixedSize(true);
+    }
+
+    @SuppressLint("DefaultLocale")
+    public void setupObservers() {
+        homeViewModel.getTransactions().observe(getViewLifecycleOwner(), transactions -> {
+            Log.d(TAG, "Transactions updated: " + transactions.size());
+            transactionAdapter.setTransactions(transactions);
+            transactionAdapter.notifyDataSetChanged();
+
+            if (!transactions.isEmpty()) {
+                recyclerView.scrollToPosition(0);
+            }
+        });
+
+        homeViewModel.getUserProfile().observe(getViewLifecycleOwner(), user -> {
+            usernameTextView.setText(user.getUsername());
+            double balance = user.getBalance();
+            balanceTextView.setText(String.format("Balance: €%.2f", balance));
+            balanceTextView.setTextColor(balance < 10 ? Color.RED : ContextCompat.getColor(requireContext(), R.color.md_theme_onPrimary));
+        });
+
+        homeViewModel.getErrorLiveData().observe(getViewLifecycleOwner(), error -> {
+            if (error != null) {
+                Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        transactionAdapter.setOnDeleteListener(transaction -> {
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Delete transaction")
+                    .setMessage("Are you sure you want to delete this transaction ?")
+                    .setPositiveButton("Delete", (dialog, which) -> {
+                        homeViewModel.deleteTransaction(transaction.getId())
+                                .observe(getViewLifecycleOwner(), success -> {
+                                    if (success) {
+                                        Toast.makeText(requireContext(), "Deleted successfully", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        Toast.makeText(requireContext(), "Delete failed", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        });
+    }
+
+    private void onSubmitTransaction() {
+
         String amountText = Objects.requireNonNull(transactionTextView.getText()).toString().trim();
+        boolean isIncome = transactionTypeSwitch.isChecked();
+        String selectedCategory = categoriesDropdown.getText().toString().trim();
 
         if (amountText.isEmpty()) {
             transactionTextView.setError("Please enter a valid amount");
@@ -219,185 +235,26 @@ public class HomeFragment extends Fragment {
             return;
         }
 
-
-        // add to the balance
-        boolean isIncome = transactionTypeSwitch.isChecked();
-
-        if (user != null) {
-            DocumentReference userDocRef = db.collection("users").document(user.getUid());
-
-            userDocRef.get().addOnSuccessListener(snapshot -> {
-                Double currentBalance = snapshot.getDouble("balance");
-                if (currentBalance == null) currentBalance = 0.0;
-
-                double newBalance;
-
-                if (isIncome) {
-                    newBalance = currentBalance + amount;
-                } else {
-                    if (amount > currentBalance) {
-                        transactionTextView.setError("Insufficient balance for this expense");
-                        return;
-                    }
-                    newBalance = currentBalance - amount;
-                }
-
-                // update the db with the new user balance
-                userDocRef.update("balance", newBalance).addOnSuccessListener(updatedTask -> {
-                    Log.d(TAG, "Balance updated");
-                }).addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to update balance " + e.toString());
-                });
-
-                if (isIncome) {
-                    Transaction transaction = new Transaction(UUID.randomUUID().toString(), user.getUid(), amount);
-
-                    Map<String, Object> transactionsMap = new HashMap<>();
-
-                    transactionsMap.put("id", transaction.getId());
-                    transactionsMap.put("userId", transaction.getUserId());
-                    transactionsMap.put("amount", transaction.getAmount());
-                    transactionsMap.put("category", transaction.getCategory());
-
-                    transactionsMap.put("timestamp", FieldValue.serverTimestamp());
-
-                    db.collection("users").document(user.getUid()).collection("transactions").document(transaction.getId()).set(transactionsMap)
-                            .addOnSuccessListener(v -> {
-                                Log.d(TAG, "Transaction added");
-                                transactionTextView.setText("");
-                            }).addOnFailureListener(v -> {
-                                Log.d(TAG, "Transaction failed");
-                                Toast.makeText(getContext(), "Transaction failed !", Toast.LENGTH_SHORT).show();
-                                transactionTextView.setText("");
-                            });
-                } else {
-                    String selectedCategory = categoriesDropdown.getText().toString().trim();
-                    ExpenseCategory expenseCategory = mapExpenseCategory(selectedCategory);
-                    Transaction transaction = new Transaction(UUID.randomUUID().toString(), user.getUid(), amount, expenseCategory);
-
-                    Map<String, Object> transactionMap = new HashMap<>();
-                    transactionMap.put("id", transaction.getId());
-                    transactionMap.put("userId", transaction.getUserId());
-                    transactionMap.put("amount", transaction.getAmount());
-                    transactionMap.put("timestamp", FieldValue.serverTimestamp());
-                    transactionMap.put("category", transaction.getCategory());
-
-                    db.collection("users").document(user.getUid()).collection("transactions").document(transaction.getId()).set(transactionMap)
-                            .addOnSuccessListener(v -> {
-                                Log.d(TAG, "Transaction added");
-                                transactionTextView.setText("");
-                            }).addOnFailureListener(v -> {
-                                Log.d(TAG, "Transaction failed");
-                                Toast.makeText(getContext(), "Transaction failed !", Toast.LENGTH_SHORT).show();
-                                transactionTextView.setText("");
-                            });
-                }
-
-                // scroll to top on insertion
-                recyclerView.scrollToPosition(0);
-            });
+        if (amount == 0) {
+            transactionTextView.setError("Transaction must be greater than zero.");
+            return;
         }
-    }
 
-    private void fetchTransactions() {
+        // store the transaction
+        homeViewModel.storeTransaction(amount, isIncome, selectedCategory);
 
-        if (user == null) return;
-        // fetch the most recent transactions from the db
-        db.collection("users").document(user.getUid()).collection("transactions").orderBy("timestamp", Query.Direction.DESCENDING).limit(10).addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                if (error != null) {
-                    Log.e(TAG, "Error fetching real time transactions");
-                    return;
-                }
+        // clear input after submission
+        transactionTextView.setText("");
 
-                if (value != null) {
-                    // clear for duplicates
-                    transactionsList.clear();
-                    for (DocumentSnapshot document : value.getDocuments()) {
-//                        Transaction transaction = document.toObject(Transaction.class);
-                        String id = document.getString("id");
-                        String userId = document.getString("userId");
-                        Double amount = document.getDouble("amount");
-                        String category = document.getString("category");
-                        Timestamp timestamp = document.getTimestamp("timestamp");
+        // clear previous errors
+        transactionTextView.setError(null);
 
-                        if (id != null && userId != null && amount != null) {
-                            Transaction transaction;
-                            if (category != null) {
-                                transaction = new Transaction(id, userId, amount, ExpenseCategory.valueOf(category));
-                            } else {
-                                transaction = new Transaction(id, userId, amount); // income
-                            }
+        // reset category selection
+        categoriesDropdown.setText("", false);
 
-                            transaction.setTimestamp(timestamp);
-                            transactionsList.add(transaction);
-                        }
-                    }
-                }
+        recyclerView.scrollToPosition(0);
 
-                Log.d(TAG, "Fetched : " + transactionsList.size() + " transactions");
-                // notify adapter
-                transactionAdapter.notifyDataSetChanged();
-            }
-        });
-    }
-
-    private void getBalanceAndUsername() {
-        if (user != null) {
-            String userId = user.getUid();
-            DocumentReference userRef = db.collection("users").document(userId);
-            userRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
-                @Override
-                public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException e) {
-                    if (e != null) {
-                        Log.w("Firestore", "Listen failed " + e.toString());
-                        return;
-                    }
-                    if (value != null && value.exists()) {
-                        Double balance = value.getDouble("balance");
-                        if (balance == null) balance = 0.0;
-
-                        String balanceText = getString(R.string.your_balance, balance);
-                        balanceTextView.setText(balanceText);
-                        usernameTextView.setText(value.getString("username"));
-                    }
-                }
-            });
-        }
-    }
-
-    private ExpenseCategory mapExpenseCategory(String category) {
-        if (category == null) return ExpenseCategory.OTHER;
-
-        switch (category.toLowerCase().trim()) {
-            case "education":
-                return ExpenseCategory.EDUCATION;
-            case "health":
-                return ExpenseCategory.HEALTH;
-            case "groceries":
-                return ExpenseCategory.GROCERIES;
-            case "entertainment":
-                return ExpenseCategory.ENTERTAINMENT;
-            case "transportation":
-                return ExpenseCategory.TRANSPORTATION;
-            default:
-                return ExpenseCategory.OTHER;
-        }
-    }
-
-    private void resetCategoriesDropdown() {
-        String[] categories = getResources().getStringArray(R.array.categories_array);
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                requireContext(),
-                R.layout.dropdown_item,
-                R.id.dropdownItemText,
-                categories
-        );
-
-        categoriesDropdown.setAdapter(adapter);
-        categoriesDropdown.setText("", false); // Clear the selection but don't trigger dropdown
+        Toast.makeText(requireContext(), "Transaction added", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -405,4 +262,26 @@ public class HomeFragment extends Fragment {
         super.onResume();
         resetCategoriesDropdown();
     }
+
+
+    private void resetCategoriesDropdown() {
+        String[] categories = getResources().getStringArray(R.array.categories_array);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.dropdown_item, R.id.dropdownItemText, categories);
+
+        categoriesDropdown.setAdapter(adapter);
+        // Clear the selection but don't trigger dropdown
+        categoriesDropdown.setText("", false);
+    }
+
+    public void onDeleteTransaction(String transactionId) {
+        homeViewModel.deleteTransaction(transactionId).observe(getViewLifecycleOwner(), success -> {
+            if (success) {
+                Toast.makeText(getContext(), "Transaction deleted", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getContext(), "Failed to delete transaction", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
 }

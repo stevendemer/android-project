@@ -4,9 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingHorizontal="10dp"
-    android:paddingVertical="2dp">
+    android:paddingVertical="8dp">
 
-    <!-- Category/Type Text -->
     <TextView
         android:id="@+id/sortTextView"
         android:layout_width="wrap_content"
@@ -14,12 +13,11 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:textAppearance="?attr/textAppearanceBodySmall"
-        android:textColor="@color/md_theme_onPrimary"
+        android:textColor="@color/md_theme_primary_highContrast"
         android:textSize="14sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Amount Text (between category and date) -->
     <TextView
         android:id="@+id/amountTextView"
         android:layout_width="wrap_content"
@@ -34,7 +32,6 @@
         app:layout_constraintStart_toEndOf="@id/sortTextView"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Date Text (right-aligned) -->
     <TextView
         android:id="@+id/dateTextView"
         android:layout_width="wrap_content"
@@ -47,15 +44,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Divider line between items -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="8dp"
-        android:background="?android:attr/listDivider"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/sortTextView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
